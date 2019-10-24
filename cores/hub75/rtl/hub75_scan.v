@@ -124,7 +124,7 @@ module hub75_scan #(
 			end else begin
 				row <= row + 1;
 				row_first <= 1'b0;
-				row_last  <= (row == {{(LOG_N_ROWS-1){1'b1}}, 1'b0});
+				row_last  <= (row == 22);
 			end
 		end
 

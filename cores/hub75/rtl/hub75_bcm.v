@@ -38,6 +38,8 @@ module hub75_bcm #(
 	output wire [LOG_N_ROWS-1:0] phy_addr,
 	output wire phy_le,
 
+	output wire [LOG_N_ROWS-1:0] early_addr,
+
 	// Shifter interface
 	output wire [N_PLANES-1:0] shift_plane,
 	output wire shift_go,
@@ -214,6 +216,7 @@ module hub75_bcm #(
 	// ---
 
 	assign phy_addr = addr_out;
+	assign early_addr = addr;
 	assign phy_le = le;
 
 	assign phy_addr_inc = (fsm_state == ST_DO_LATCH) ? addr_do_inc : 1'b0;

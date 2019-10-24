@@ -50,6 +50,7 @@ module hub75_top #(
 	output wire [PHY_N-1:0] hub75_addr_inc,
 	output wire [PHY_N-1:0] hub75_addr_rst,
 	output wire [(PHY_N*LOG_N_ROWS)-1:0] hub75_addr,
+	output wire [PHY_N-1:0] hub75_shift_data,
 	output wire [ESDW-1 :0] hub75_data,
 	output wire [PHY_N-1:0] hub75_clk,
 	output wire [PHY_N-1:0] hub75_le,
@@ -97,10 +98,12 @@ module hub75_top #(
 	wire phy_addr_inc;
 	wire phy_addr_rst;
 	wire [LOG_N_ROWS-1:0] phy_addr;
+	wire [LOG_N_ROWS-1:0] early_addr;
 	wire [SDW-1:0] phy_data;
 	wire phy_clk;
 	wire phy_le;
 	wire phy_blank;
+	wire phy_shift_data;
 
 	wire phz_addr_inc;
 	wire phz_addr_rst;
@@ -217,11 +220,13 @@ module hub75_top #(
 
 	// Binary Code Modulator control
 	hub75_bcm #(
-		.N_PLANES(N_PLANES)
+		.N_PLANES(N_PLANES),
+		.N_ROWS(N_ROWS)
 	) bcm_I (
 		.phy_addr_inc(phy_addr_inc),	// -> hub75_phy
 		.phy_addr_rst(phy_addr_rst),	// -> hub75_phy
 		.phy_addr(phy_addr),			// -> hub75_phy
+		.early_addr(early_addr),
 		.phy_le(phy_le),				// -> hub75_phy
 		.shift_plane(shift_plane),		// -> hub75_shift
 		.shift_go(shift_go),			// -> hub75_shift
@@ -244,17 +249,20 @@ module hub75_top #(
 	hub75_shift #(
 		.N_BANKS(N_BANKS),
 		.N_COLS(N_COLS),
+		.N_ROWS(N_ROWS),
 		.N_CHANS(N_CHANS),
 		.N_PLANES(N_PLANES)
 	) shift_I (
 		.phy_data(phy_data),			// -> hub75_phy
 		.phy_clk(phy_clk),				// -> hub75_phy
+		.phy_shift_data(phy_shift_data),
 		.ram_data(fbr_data),			// <- hub75_framebuffer
 		.ram_col_addr(fbr_col_addr),	// -> hub75_framebuffer
 		.ram_rden(fbr_rden),			// -> hub75_framebuffer
 		.ctrl_plane(shift_plane),		// <- hub75_bcm
 		.ctrl_go(shift_go),				// <- hub75_bcm
 		.ctrl_rdy(shift_rdy),			// -> hub75_bcm
+		.addr(early_addr),
 		.clk(clk),						// <- top
 		.rst(rst)						// <- top
 	);
@@ -340,9 +348,11 @@ module hub75_top #(
 				.hub75_clk(hub75_clk),			// -> pad
 				.hub75_le(hub75_le),			// -> pad
 				.hub75_blank(hub75_blank),		// -> pad
+				.hub75_shift_data(hub75_shift_data),
 				.phy_addr_inc(phz_addr_inc),	// <- hub75_bcm
 				.phy_addr_rst(phz_addr_rst),	// <- hub75_bcm
 				.phy_addr(phz_addr),			// <- hub75_bcm
+				.phy_shift_data(phy_shift_data),
 				.phy_data(phz_data),			// <- hub75_shift
 				.phy_clk(phz_clk),				// <- hub75_shift
 				.phy_le(phz_le),				// <- hub75_bcm

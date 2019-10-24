@@ -41,6 +41,7 @@ module hub75_phy #(
 	output wire [PHY_N-1:0] hub75_addr_inc,
 	output wire [PHY_N-1:0] hub75_addr_rst,
 	output wire [(PHY_N*LOG_N_ROWS)-1:0] hub75_addr,
+	output wire hub75_shift_data,
 	output wire [SDW-1  :0] hub75_data,
 	output wire [PHY_N-1:0] hub75_clk,
 	output wire [PHY_N-1:0] hub75_le,
@@ -50,6 +51,7 @@ module hub75_phy #(
 	input wire phy_addr_inc,
 	input wire phy_addr_rst,
 	input wire [LOG_N_ROWS-1:0] phy_addr,
+	input wire phy_shift_data,
 	input wire [SDW-1:0] phy_data,
 	input wire phy_clk,
 	input wire phy_le,
@@ -118,6 +120,24 @@ module hub75_phy #(
 		.D_OUT_0(phy_data)
 	);
 
+
+	reg shift;
+	always @(posedge clk)
+		shift <= phy_shift_data;
+
+	// Data lines
+	SB_IO #(
+		.PIN_TYPE(6'b010100),
+		.PULLUP(1'b0),
+		.NEG_TRIGGER(1'b0),
+		.IO_STANDARD("SB_LVCMOS")
+	) iob_shift_data_I (
+		.PACKAGE_PIN(hub75_shift_data),
+		.CLOCK_ENABLE(1'b1),
+		.OUTPUT_CLK(clk),
+		.D_OUT_0(shift)
+	);
+
 	// Falling edge clock, so we need one more delay so it's not too early !
 	always @(posedge clk or posedge rst)
 		if (rst) begin
@@ -140,6 +160,14 @@ module hub75_phy #(
 		.D_OUT_1(phy_clk_f)
 	);
 
+	reg le;
+	always @(posedge clk)
+		le <= phy_le;
+
+	reg le_f;
+	always @(posedge clk)
+		le_f <= le;
+
 	// Latch
 	SB_IO #(
 		.PIN_TYPE(6'b010100),
@@ -150,7 +178,7 @@ module hub75_phy #(
 		.PACKAGE_PIN(hub75_le),
 		.CLOCK_ENABLE(1'b1),
 		.OUTPUT_CLK(clk),
-		.D_OUT_0(phy_le)
+		.D_OUT_0(le)
 	);
 
 	// Blanking

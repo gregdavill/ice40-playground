@@ -33,9 +33,10 @@
 
 `default_nettype none
 
-//`define STREAM
-`define PATTERN
+`define STREAM
+//`define PATTERN
 //`define VIDEO
+`define SLOW
 
 module top (
 	// RGB panel PMOD
@@ -54,8 +55,8 @@ module top (
 	output wire [1:0] hub75_le,
 	output wire [1:0] hub75_blank,
 `else
-	output wire [4:0] hub75_addr,
-	output wire [5:0] hub75_data,
+	output wire hub75_shift_data,
+	output wire [2:0] hub75_data,
 	output wire hub75_clk,
 	output wire hub75_le,
 	output wire hub75_blank,
@@ -88,10 +89,10 @@ module top (
 `ifdef BOARD_ICEBREAKER_SINGLE2X
 	localparam integer N_BANKS  = 4;
 `else
-	localparam integer N_BANKS  = 2;
+	localparam integer N_BANKS  = 1;
 `endif
-	localparam integer N_ROWS   = 32;
-	localparam integer N_COLS   = 64;
+	localparam integer N_ROWS   = 24;
+	localparam integer N_COLS   = 192;
 	localparam integer N_CHANS  = 3;
 	localparam integer N_PLANES = 10;
 	localparam integer BITDEPTH = 16;
@@ -153,7 +154,7 @@ module top (
 		.PHY_AIR(3),	// Enabled and invert INC
 		.SCAN_MODE("LINEAR")
 `else
-		.SCAN_MODE("ZIGZAG")
+		.SCAN_MODE("LINEAR")
 `endif
 	) hub75_I (
 `ifdef BOARD_ICEBREAKER_SINGLE
@@ -163,7 +164,8 @@ module top (
 		.hub75_addr_inc(hub75_addr_inc),
 		.hub75_addr_rst(hub75_addr_rst),
 `else
-		.hub75_addr(hub75_addr),
+		//.hub75_addr(hub75_addr),
+		.hub75_shift_data(hub75_shift_data),
 `endif
 		.hub75_data(hub75_data),
 		.hub75_clk(hub75_clk),
@@ -180,10 +182,10 @@ module top (
 		.frame_swap(frame_swap),
 		.frame_rdy(frame_rdy),
 		.ctrl_run(ctrl_run),
-		.cfg_pre_latch_len(8'h80),
+		.cfg_pre_latch_len(8'h10),
 		.cfg_latch_len(8'h80),
-		.cfg_post_latch_len(8'h80),
-		.cfg_bcm_bit_len(8'h06),
+		.cfg_post_latch_len(8'h10),
+		.cfg_bcm_bit_len(8'h04),
 		.clk(clk),
 		.clk_2x(clk_2x),
 		.rst(rst)
