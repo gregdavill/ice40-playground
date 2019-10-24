@@ -37,11 +37,11 @@
 module hub75_top_tb;
 
 	// Params
-	localparam integer N_BANKS  = 2;
-	localparam integer N_ROWS   = 32;
-	localparam integer N_COLS   = 64;
+	localparam integer N_BANKS  = 1;
+	localparam integer N_ROWS   = 24;
+	localparam integer N_COLS   = 32*6;
 	localparam integer N_CHANS  = 3;
-	localparam integer N_PLANES = 8;
+	localparam integer N_PLANES = 6;
 	localparam integer BITDEPTH = 24;
 
 	localparam integer LOG_N_BANKS = $clog2(N_BANKS);
@@ -53,7 +53,9 @@ module hub75_top_tb;
 	reg clk = 1'b0;
 	reg clk_2x = 1'b0;
 
-	wire [$clog2(N_ROWS)-1:0] hub75_addr;
+	//wire [$clog2(N_ROWS)-1:0] hub75_addr;
+
+	wire hub75_shift_data;
 	wire [(N_BANKS*N_CHANS)-1:0] hub75_data;
 	wire hub75_clk;
 	wire hub75_le;
@@ -111,9 +113,11 @@ module hub75_top_tb;
 		.N_COLS(N_COLS),
 		.N_CHANS(N_CHANS),
 		.N_PLANES(N_PLANES),
-		.BITDEPTH(BITDEPTH)
+		.BITDEPTH(BITDEPTH),
+		.SCAN_MODE("LINEAR")
 	) dut_I (
-		.hub75_addr(hub75_addr),
+		.hub75_shift_data(hub75_shift_data),
+		//.hub75_addr(hub75_addr),
 		.hub75_data(hub75_data),
 		.hub75_clk(hub75_clk),
 		.hub75_le(hub75_le),
@@ -129,10 +133,10 @@ module hub75_top_tb;
 		.frame_swap(frame_swap),
 		.frame_rdy(frame_rdy),
 		.ctrl_run(1'b1),
-		.cfg_pre_latch_len(8'h80),
-		.cfg_latch_len(8'h80),
-		.cfg_post_latch_len(8'h80),
-		.cfg_bcm_bit_len(8'h06),
+		.cfg_pre_latch_len(8'h10),
+		.cfg_latch_len(8'h10),
+		.cfg_post_latch_len(8'h10),
+		.cfg_bcm_bit_len(8'h01),
 		.clk(clk),
 		.clk_2x(clk_2x),
 		.rst(rst)
